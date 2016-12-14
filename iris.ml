@@ -14,7 +14,6 @@ let download_file filename =
       sprintf "wget %s%s > /dev/null 2>&1; sed -i '' -e '/^$/d' %s"
         parent filename filename
     in
-    printf "%s\n" com;
     ignore (Sys.command com);
   end
 ;;
