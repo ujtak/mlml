@@ -13,6 +13,7 @@ let fetch_data =
     in
     if not (Sys.file_exists filename) then begin
       printf "Downloading %s ...\n" filename;
+      flush stdout;
       let com = sprintf "wget %s%s > /dev/null 2>&1" parent filename in
       ignore (Sys.command com)
     end
@@ -20,6 +21,7 @@ let fetch_data =
   let extract_file filename =
     if not (Sys.file_exists filename) then begin
       printf "Extracting %s ...\n" (filename^".gz");
+      flush stdout;
       let com = sprintf "gzip -dc %s > %s" (filename^".gz") filename in
       ignore (Sys.command com)
     end
@@ -60,6 +62,7 @@ let load_data =
 
     (data_images, target_labels)
   in
+
   let data_train, target_train = load_mnist train_images train_labels 60000 in
   let data_test, target_test = load_mnist test_images test_labels 10000 in
   let mnist = Hashtbl.create 1 in
@@ -68,10 +71,16 @@ let load_data =
     "train", (data_train, target_train);
     "test",  (data_test, target_test);
   ];
+
   mnist
 ;;
 
 let () =
-  fetch_data
+  let mnist = load_data in
+  let train_data, train_target = Hashtbl.find mnist "train" in
+  printf "%d\n" train_target.(10);
+  for i = 0 to mnist_input_size-1 do
+    printf "%d\n" train_data.(10).(i)
+  done
 ;;
 

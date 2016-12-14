@@ -9,7 +9,8 @@ let download_file filename =
     "http://archive.ics.uci.edu/ml/machine-learning-databases/iris/"
   in
   if not (Sys.file_exists filename) then begin
-    printf "Downloading %s ...\n" filename; flush stdout;
+    printf "Downloading %s ...\n" filename;
+    flush stdout;
     let com =
       sprintf "wget %s%s > /dev/null 2>&1; sed -i '' -e '/^$/d' %s"
         parent filename filename
