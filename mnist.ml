@@ -4,7 +4,8 @@ let train_images = "train-images-idx3-ubyte"
 let train_labels = "train-labels-idx1-ubyte"
 let test_images = "t10k-images-idx3-ubyte"
 let test_labels = "t10k-labels-idx1-ubyte"
-let mnist_input_size = 784
+let image_dim   = 784
+let num_labels  = 10
 
 let fetch_data =
   let download_file filename =
@@ -49,11 +50,11 @@ let load_data =
       ignore (input_byte chan_labels);
     done;
 
-    let data_images   = Array.make_matrix length mnist_input_size 0 in
+    let data_images   = Array.make_matrix length image_dim 0 in
     let target_labels = Array.make length 0 in
     for i = 0 to length-1 do
       target_labels.(i) <- input_byte chan_labels;
-      for j = 0 to mnist_input_size-1 do
+      for j = 0 to image_dim-1 do
         data_images.(i).(j) <- input_byte chan_images;
       done
     done;
@@ -79,7 +80,7 @@ let () =
   let mnist = load_data in
   let train_data, train_target = Hashtbl.find mnist "train" in
   printf "%d\n" train_target.(10);
-  for i = 0 to mnist_input_size-1 do
+  for i = 0 to image_dim-1 do
     printf "%d\n" train_data.(10).(i)
   done
 ;;

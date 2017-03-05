@@ -43,7 +43,7 @@ let vote target args =
   let sorted_arg = argsort_int cand in
   sorted_arg.(max_vec - min_vec) + min_vec
 
-let knn_classifier data target sample =
+let knn_classifier ~data ~target sample =
   let k = 5 in
   let norm_vec = Array.map (dist sample) data in
   let sorted_arg = argsort_float norm_vec in
@@ -76,7 +76,7 @@ let () =
   let test_data     = Array.sub iris_data 120 30 in
   let test_target   = Array.sub iris_target 120 30 in
 
-  let knn           = knn_classifier train_data train_target in
+  let knn           = knn_classifier ~data:train_data ~target:train_target in
   let result        = Array.map knn test_data in
   let num_corr      = Array.fold_left (+) 0 (Array.map2 same result test_target) in
   let prob          = (float_of_int num_corr) /. 30.0 in
