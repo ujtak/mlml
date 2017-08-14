@@ -50,12 +50,12 @@ let load_data =
       ignore (input_byte chan_labels);
     done;
 
-    let data_images   = Array.make_matrix length image_dim 0 in
+    let data_images   = Array.make_matrix length image_dim 0.0 in
     let target_labels = Array.make length 0 in
     for i = 0 to length-1 do
       target_labels.(i) <- input_byte chan_labels;
       for j = 0 to image_dim-1 do
-        data_images.(i).(j) <- input_byte chan_images;
+        data_images.(i).(j) <- float_of_int (input_byte chan_images);
       done
     done;
     close_in chan_images;
@@ -76,12 +76,13 @@ let load_data =
   mnist
 ;;
 
+(*
 let () =
   let mnist = load_data in
   let train_data, train_target = Hashtbl.find mnist "train" in
   printf "%d\n" train_target.(10);
   for i = 0 to image_dim-1 do
-    printf "%d\n" train_data.(10).(i)
+    printf "%f\n" train_data.(10).(i)
   done
 ;;
-
+*)

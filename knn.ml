@@ -76,10 +76,10 @@ let () =
   let test_data     = Array.sub iris_data 120 30 in
   let test_target   = Array.sub iris_target 120 30 in
 
-  let knn           = knn_classifier ~data:train_data ~target:train_target in
-  let result        = Array.map knn test_data in
-  let num_corr      = Array.fold_left (+) 0 (Array.map2 same result test_target) in
-  let prob          = (float_of_int num_corr) /. 30.0 in
+  let knn       = knn_classifier ~data:train_data ~target:train_target in
+  let result    = Array.map knn test_data in
+  let num_corr  = Array.fold_left (+) 0 (Array.map2 same result test_target) in
+  let prob      = (float_of_int num_corr) /. 30.0 in
 
   printf "Accuracy: %f\n" prob
 ;;
