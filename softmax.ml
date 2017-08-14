@@ -48,17 +48,34 @@ let error_grad y_calc y_true = Array.map2 ( -. ) y_calc y_true
 let weight_grad input grad = outer input grad
 let bias_grad input grad = grad
 
-let make_params out_dim in_dim =
-  let weight = Array.make_matrix out_dim in_dim 0.0 in
-  let bias   = Array.make out_dim 0.0 in
+let make_params out_dim in_dim value =
+  let weight = Array.make_matrix out_dim in_dim value in
+  let bias   = Array.make out_dim value in
   (weight, bias)
 
 
 
-let rec train_logistic epoch weight bias data target =
-  printf "%d epoch remains\n" epoch;
+let test_logistic weight bias data target =
+  let ys_calc =
+    let classifier = logistic ~weight:weight ~bias:bias in
+    Array.map classifier data
+  in
 
-  let alpha = 0.01 in
+  let label_len = Array.length bias in
+  let result = Array.map (label label_len) ys_calc in
+  let num_corr  = Array.fold_left (+) 0 (Array.map2 same result target) in
+
+  let total_len  = Array.length target in
+  let accuracy = (float_of_int num_corr) /. (float_of_int total_len) in
+  accuracy
+;;
+
+
+
+let rec train_logistic epoch weight bias data target =
+  let alpha = 0.001 in
+  let total_len = Array.length target in
+  let r_len = 1.0 /. (float_of_int total_len) in
 
   let ys_true =
     let onehot_label = onehot (Array.length bias) in
@@ -76,15 +93,15 @@ let rec train_logistic epoch weight bias data target =
   let init_weight, init_bias =
     let in_dim  = Array.length weight.(0) in
     let out_dim = Array.length weight in
-    make_params out_dim in_dim
+    make_params out_dim in_dim 0.0
   in
-  let g_weight  = Array.fold_left matadd init_weight gs_weight in
-  let g_bias    = Array.fold_left vecadd init_bias gs_bias in
+  let g_weight  = matsca r_len (Array.fold_left matadd init_weight gs_weight) in
+  let g_bias    = vecsca r_len (Array.fold_left vecadd init_bias   gs_bias  ) in
 
   let n_weight = matsub weight (matsca alpha g_weight) in
-  let n_bias   = vecsub bias (vecsca alpha g_bias) in
+  let n_bias   = vecsub bias   (vecsca alpha g_bias) in
 
-  if epoch == 0 then
+  if epoch == 1 then
     (n_weight, n_bias)
   else
     train_logistic (epoch-1) n_weight n_bias data target
@@ -92,34 +109,18 @@ let rec train_logistic epoch weight bias data target =
 
 
 
-let test_logistic weight bias data target =
-  let ys_calc =
-    let classifier = logistic ~weight:weight ~bias:bias in
-    Array.map classifier data
-  in
-
-  let total_len = Array.length bias in
-  let result = Array.map (label total_len) ys_calc in
-  let num_corr  = Array.fold_left (+) 0 (Array.map2 same result target) in
-
-  (float_of_int num_corr) /. (float_of_int total_len)
-;;
-
-
-
 let () =
-  print_endline "load start";
   let mnist                     = Mnist.load_data in
   let train_data, train_target  = Hashtbl.find mnist "train" in
   let test_data, test_target    = Hashtbl.find mnist "test" in
-
-  print_endline "train start";
-  let init_weight, init_bias = make_params Mnist.num_labels Mnist.image_dim in
-  let weight, bias =
-    train_logistic 2 init_weight init_bias train_data train_target
+  let init_weight, init_bias =
+    make_params Mnist.num_labels Mnist.image_dim 0.0
   in
 
-  print_endline "test start";
+  let weight, bias =
+    train_logistic 1 init_weight init_bias train_data train_target
+  in
+
   let accuracy =
     test_logistic weight bias test_data test_target
   in
